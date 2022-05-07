@@ -17,7 +17,6 @@ public class UserDaoImpl implements UserDao{
     @Override
     public void saveUser(User user) {
     entityManager.persist(user);
-    entityManager.flush();
     }
 
     @Override
@@ -26,24 +25,21 @@ public class UserDaoImpl implements UserDao{
     }
 
     @Override
-    public User getUserById(int id) {return getListUsers().get(id);
+    public User getUserById(int id) {return   getListUsers().stream().filter(user -> user.getId() == id).findAny().orElse(null);
     }
 
     @Override
-    public void updateUserById(int id,User user) {
-
-        User bDUser = getUserById(id);
-        bDUser.setPenisSize(user.getPenisSize());
-        bDUser.setName(user.getName());
-        bDUser.setDrove(user.getDrove());
-        entityManager.merge(bDUser);
+    public void updateUserById(int id,User userLast) {
+        User user = getUserById(id);
+        user.setPenisSize(userLast.getPenisSize());
+        user.setName(userLast.getName());
+        user.setDrove(userLast.getDrove());
+        entityManager.merge(user);
         entityManager.flush();
     }
 
     @Override
     public void deleteUserById(int id) {
-        entityManager.createQuery("DELETE FROM User WHERE id = :id")
-                .setParameter("id", id)
-                .executeUpdate();
+        entityManager.remove(getUserById(id));
     }
 }
